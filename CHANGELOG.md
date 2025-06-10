@@ -1,5 +1,5 @@
 # Changelog
 
-## 0.6.0
+## 1.0.0
 
-Now falls back to `sans-serif` font if none specified.
+Initial release to go with [this blog post](https://slipway.co/blog/eink-energy-dashboard).
