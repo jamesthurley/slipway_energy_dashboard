@@ -1,0 +1,243 @@
+{
+  "context": {
+    "device": {
+      "width": 480,
+      "height": 800,
+      "theme": {
+        "solar_color": "rgb(230, 150, 0)",
+        "grid_export_color": "rgb(230, 150, 0)",
+        "tariff_bar_low_color": "rgb(230, 150, 0)",
+        "grid_import_color": "rgb(125, 0, 0)",
+        "tariff_bar_high_color": "rgb(125, 0, 0)",
+        "power_used_color": "rgb(255, 255, 255)",
+        "battery_color": "rgb(0, 0, 0)",
+        "background_color": "rgb(255, 255, 255)",
+        "foreground_color": "rgb(0, 0, 0)",
+        "header_background_color": "rgb(230, 150, 0)",
+        "header_foreground_color": "rgb(0, 0, 0)",
+        "cash_flow_line_padding": 30
+      }
+    }
+  },
+  "rigging": {
+    "utils": {
+      "component": "jamesthurley.energy_dashboard__utils.1.0.0",
+      "input": {}
+    },
+    "givenergy": {
+      "component": "jamesthurley.energy_dashboard__givenergy.1.0.0",
+      "allow": [
+        {
+          "permission": "env",
+          "prefix": "GIVENERGY_"
+        },
+        {
+          "permission": "http",
+          "prefix": "https://api.givenergy.cloud/"
+        }
+      ],
+      "input": {}
+    },
+    "octopus_tariff": {
+      "component": "jamesthurley.energy_dashboard__octopus_tariff.1.0.0",
+      "allow": [
+        {
+          "permission": "env",
+          "prefix": "OCTOPUS_"
+        },
+        {
+          "permission": "http",
+          "prefix": "https://api.octopus.energy/"
+        }
+      ],
+      "input": {}
+    },
+    "render": {
+      "component": "slipwayhq.render.0.7.0",
+      "allow": [
+        {
+          "permission": "fonts"
+        },
+        {
+          "permission": "registry_components"
+        }
+      ],
+      "callouts": {
+        "energy_flow_chart": {
+          "component": "jamesthurley.energy_dashboard__energy_flow_chart.1.0.0",
+          "allow": [
+            { "permission": "fonts" },
+            { "permission": "registry_components" }
+          ]
+        },
+        "energy_graph": {
+          "component": "jamesthurley.energy_dashboard__energy_graph.1.0.0",
+          "allow": [
+            { "permission": "fonts" },
+            { "permission": "registry_components" }
+          ]
+        },
+        "energy_lifetime": {
+          "component": "jamesthurley.energy_dashboard__energy_lifetime.1.0.0",
+          "allow": [
+            { "permission": "fonts" },
+            { "permission": "registry_components" }
+          ]
+        },
+        "tariff_rate_graph": {
+          "component": "jamesthurley.energy_dashboard__tariff_rate_graph.1.0.0",
+          "allow": [
+            { "permission": "fonts" },
+            { "permission": "registry_components" }
+          ]
+        },
+        "energy_cash_flow": {
+          "component": "jamesthurley.energy_dashboard__energy_cash_flow.1.0.0",
+          "allow": [
+            { "permission": "fonts" },
+            { "permission": "registry_components" }
+          ]
+        }
+      },
+      "input": {
+        "host_config": {
+          "containerStyles": {
+            "default": {
+              "backgroundColor": "$.context.device.theme.background_color",
+              "foregroundColors": {
+                "default": {
+                  "default": "$.context.device.theme.foreground_color"
+                }
+              }
+            },
+            "attention": {
+              "backgroundColor": "$.context.device.theme.header_background_color",
+              "borderThickness": 0,
+              "foregroundColors": {
+                "default": {
+                  "default": "$.context.device.theme.header_foreground_color"
+                }
+              }
+            }
+          }
+        },
+        "canvas": {
+          "width": "$.context.device.width",
+          "height": "$.context.device.height"
+        },
+        "card": {
+          "type": "AdaptiveCard",
+          "body": [
+            {
+              "type": "Container",
+              "style": "attention",
+              "bleed": true,
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "size": "extraLarge",
+                  "text": "$$.utils.formatted_date",
+                  "wrap": true
+                },
+                {
+                  "type": "TextBlock",
+                  "spacing": "small",
+                  "size": "medium",
+                  "text": "$$.utils.formatted_time",
+                  "wrap": true
+                }
+              ]
+            },
+            {
+              "type": "Image",
+              "height": "180px",
+              "spacing": "large",
+              "url": "component://energy_flow_chart?width=$width&height=$height",
+              "body": {
+                "data": "$$.givenergy.today.day",
+                "theme": "$.context.device.theme"
+              }
+            },
+            {
+              "type": "Container",
+              "bleed": true,
+              "spacing": "large",
+              "height": "stretch",
+              "items": [
+                {
+                  "type": "Image",
+                  "height": "stretch",
+                  "url": "component://energy_graph?width=$width&height=$height",
+                  "body": {
+                    "power": "$$.givenergy.today.power",
+                    "theme": "$.context.device.theme"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "ColumnSet",
+              "columns": [
+                {
+                  "type": "Column",
+                  "width": "stretch",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "size": "large",
+                      "text": "Today's Rates"
+                    },
+                    {
+                      "type": "Image",
+                      "height": "100px",
+                      "spacing": "small",
+                      "url": "component://tariff_rate_graph?width=$width&height=$height",
+                      "body": {
+                        "prices": "$$.octopus_tariff.today",
+                        "theme": "$.context.device.theme"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "Column",
+                  "width": "140px",
+                  "verticalContentAlignment": "top",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "size": "large",
+                      "text": "Yesterday"
+                    },
+                    {
+                      "type": "Image",
+                      "height": "stretch",
+                      "spacing": "small",
+                      "url": "component://energy_cash_flow?width=$width&height=90",
+                      "body": {
+                        "power": "$$.givenergy.yesterday.power",
+                        "day": "$$.givenergy.yesterday.day",
+                        "prices": "$$.octopus_tariff.yesterday",
+                        "generation_rate": 25.84,
+                        "theme": "$.context.device.theme"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Image",
+              "height": "40px",
+              "url": "component://energy_lifetime?width=$width&height=$height",
+              "body": {
+                "data": "$$.givenergy.today.total",
+                "theme": "$.context.device.theme"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

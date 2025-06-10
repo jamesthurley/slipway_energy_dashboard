@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  prerelease:
+    runs-on: ubuntu-latest
+
+    outputs:
+      value: ${{ steps.prerelease.outputs.value }}
+
+    steps:
+    - name: Prerelease Check
+      id: prerelease
+      run: |
+        if [[ ${{ github.ref_name }} =~ ^[0-9]+[.][0-9]+[.][0-9]+$ ]]; then
+            echo value=false >> $GITHUB_OUTPUT
+        else
+            echo value=true >> $GITHUB_OUTPUT
+        fi
+  
+  release:
+    runs-on: ubuntu-latest
+
+    needs:
+    - prerelease
+
+    steps:
+      - uses: extractions/setup-just@v3
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
+      - name: Patch version field in JSON
+        run: |
+          find components -type f -name slipway_component.json | while read -r file; do
+            jq --arg v "$VERSION" '.version = $v' "$file" > tmp && mv tmp "$file"
+          done
+          sed -r -i "s|jamesthurley\.energy_cash_flow\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.energy_cash_flow.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.energy_flow_chart\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.energy_flow_chart.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.energy_graph\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.energy_graph.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.energy_lifetime\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.energy_lifetime.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.givenergy\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.givenergy.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.octopus_tariff\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.octopus_tariff.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.tariff_rate_graph\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.tariff_rate_graph.${VERSION}|g" rigs/energy_dashboard.json
+          sed -r -i "s|jamesthurley\.utils\.[0-9]+\.[0-9]+\.[0-9]+|jamesthurley.utils.${VERSION}|g" rigs/energy_dashboard.json
+
+      - name: Build release tarball
+        run: just build-ci
+
+      - name: Create GitHub release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ env.VERSION }}"
+          draft: false
+          prerelease: ${{ needs.prerelease.outputs.value }}
+          files: "components/*.tar"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

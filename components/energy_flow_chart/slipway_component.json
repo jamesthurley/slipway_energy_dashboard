@@ -1,0 +1,63 @@
+{
+  "publisher": "jamesthurley",
+  "name": "energy_dashboard__energy_flow_chart",
+  "version": "1.0.0",
+  "input": {
+    "properties": {
+      "width": {
+        "type": "uint32"
+      },
+      "height": {
+        "type": "uint32"
+      },
+      "data": {
+        "properties": {
+          "consumption": {
+            "type": "float64"
+          },
+          "grid": {
+            "properties": {
+              "export": {
+                "type": "float64"
+              },
+              "import": {
+                "type": "float64"
+              }
+            }
+          },
+          "solar": {
+            "type": "float64"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "optionalProperties": {
+      "theme": {
+        "optionalProperties": {
+          "solar_color": { "type": "string" },
+          "grid_import_color": { "type": "string" },
+          "grid_export_color": { "type": "string" },
+          "power_used_color": { "type": "string" },
+          "foreground_color": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "output": "canvas",
+  "rigging": {
+    "output": {
+      "component": "slipwayhq.svg.0.6.1",
+      "allow": [
+        { "permission": "fonts" }
+      ],
+      "input": {
+        "width": "$$.input.width",
+        "height": "$$.input.height",
+        "svg": "$$.input.run.svg",
+        "scale": true
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "publisher": "jamesthurley",
+  "name": "energy_dashboard__utils",
+  "version": "1.0.0",
+  "input": {},
+  "output": {
+    "properties": {
+      "formatted_date": {
+        "type": "string"
+      },
+      "formatted_time": {
+        "type": "string"
+      }
+    }
+  }
+}
