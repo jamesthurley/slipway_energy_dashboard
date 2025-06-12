@@ -17,7 +17,7 @@
       "deny": []
     }
   },
-  "hashed_api_keys": {
-    "key1": "8e1a6bfc4cd250b0d687abe26c251941c132f136fbb4e113a5b02b9e10b05041"
-  }
+  "api_keys": [
+    { "hashed_key": "8e1a6bfc4cd250b0d687abe26c251941c132f136fbb4e113a5b02b9e10b05041" }
+  ]
 }
